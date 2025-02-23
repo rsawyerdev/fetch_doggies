@@ -1,5 +1,6 @@
 import Axios from 'axios';
 import axiosRetry from 'axios-retry';
+import { useMutation, useQuery, QueryClient } from '@tanstack/react-query';
 
 export const axios = Axios.create({
   baseURL: 'https://frontend-take-home-service.fetch.com',
@@ -48,3 +49,33 @@ axios.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+async function login(name: any, email: any) {
+  const { data } = await axios.post('/auth/login', name, email);
+  return data;
+}
+
+export function useLogin() {
+  const mutation = useMutation({ mutationFn: login });
+
+  return mutation;
+}
+
+async function getDogBreeds() {
+  const data = axios.get('/dogs/breeds');
+  return data;
+}
+
+export function useGetDogBreeds() {
+  const queryClient = new QueryClient();
+  const query = useQuery(
+    {
+      queryKey: ['breeds'],
+      queryFn: async () => getDogBreeds(),
+      staleTime: 60000,
+    },
+    queryClient
+  );
+
+  return query;
+}
